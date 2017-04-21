@@ -21,6 +21,6 @@ public interface PartRepository extends Remote{
     public void addPart(Part part) throws RemoteException;
 
     //PRINTERS
-    public void showParts() throws RemoteException;
+//    public void showParts() throws RemoteException;
 }
 

@@ -52,6 +52,11 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
         return this.description;
     }
 
+    @Override
+    public Map<Part, Integer> getSubComponents() throws RemoteException{
+        return subComponents;
+    }
+
 
     //PART SETTERS
     @Override
@@ -81,49 +86,14 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
 
     //PART REPOSITORY GETTERS
     @Override
-    public Part getPart(int cod){
+    public Part getPart(int cod) throws RemoteException{
+        for (Part currPart : parts) {
+            if(currPart.getCod() == cod){
+                return currPart;
+            }
+        }
         return null;
     }
-
-    @Override
-    public void addPart(Part part) throws RemoteException {
-        parts.add(part);
-    }
-
-    @Override
-    public Map<Part, Integer> getSubcomponents() throws RemoteException{
-        return subComponents;
-    }
-
-//    @Override
-//    public Part selectPart(int cod) throws RemoteException {
-//        Iterator <AmountSubComponents> iterator = componentsPart.iterator();
-//        AmountSubComponents auxSubPart = null;
-//        while (iterator.hasNext()) {
-//            auxSubPart = iterator.next();
-//            if(cod == auxSubPart.getSubComponent().getCod()) {
-//                break;
-//            }
-//        }
-//        return auxSubPart.getSubComponent();
-//    }
-
-
-    @Override
-    public void showParts() throws RemoteException{
-        Iterator <Part> iterator = parts.iterator();
-        Part auxPart = null;
-        System.out.println("------ Lista de todas as Parts ------");
-        while (iterator.hasNext()) {
-            auxPart = iterator.next();
-            System.out.printf("Codigo: %i\n", auxPart.getCod());
-            System.out.printf("Nome: %s\n", auxPart.getName());
-            System.out.printf("Descricao: %i\n", auxPart.getDescription());
-            System.out.println();
-        }
-        System.out.println("-------------------------------------");
-    }
-
 
     @Override
     public String getConnection() throws RemoteException {
@@ -140,6 +110,7 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
         return this.parts;
     }
 
+    //PART REPOSITORY SETTERS
     @Override
     public void setConnection(String conn) throws RemoteException {
         this.connection = conn;
@@ -150,6 +121,20 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
         this.namePartsRepository = name;
     }
 
+    //PART REPOSITORY ADDERS
+    @Override
+    public void addPart(Part part) throws RemoteException {
+        parts.add(part);
+    }
 
+//    //PART REPOSITORY PRINTERS
+//    @Override
+//    public void showParts() throws RemoteException{
+//        for (Part currPart: parts) {
+//            System.out.println("Codigo:"+currPart.getCod());
+//            System.out.println("Nome: "+currPart.getName());
+//            System.out.println("descricao: "+currPart.getDescription());
+//        }
+//    }
 
 }
