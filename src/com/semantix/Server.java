@@ -11,23 +11,21 @@ import java.util.Map;
 
 public class Server extends UnicastRemoteObject implements Part , PartRepository {
 
-    private static final long serialVersionUID = 1L;
+//    private static final long serialVersionUID = 1L;
 
-    //variaveis de Part
-    public int codPart = 0;
-    public String namePart  = "";
-    public String describePart = "";
+    //PART
+    public int cod = 0;
+    public String name  = "";
+    public String description = "";
     public Map<Part, Integer> subComponents = new HashMap<Part, Integer>();
-//    public ArrayList<AmountSubComponents> componentsPart = new ArrayList<AmountSubComponents>();
 
-    //variaveis de PartRepository
-    public ArrayList<Part> partsList = new ArrayList<Part>();
+    //PART REPOSITORY
+    public ArrayList<Part> parts = new ArrayList<Part>();
     public String connection = "";
-    public String namePR = "";
+    public String namePartsRepository = "";
 
-    //variaveis do Servidor
+    //SERVER
     public String nameServer = "";
-
 
     public Server() throws RemoteException {
         super();
@@ -37,45 +35,59 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
     //  PART  //
     ////////////
 
+
+    //PART GETTERS
     @Override
     public int getCod() throws RemoteException {
-        return this.codPart;
+        return this.cod;
     }
 
     @Override
     public String getName() throws RemoteException {
-        return this.namePart;
+        return this.name;
     }
 
     @Override
     public String getDescription() throws RemoteException {
-        return this.describePart;
+        return this.description;
     }
 
 
+    //PART SETTERS
     @Override
     public void setCod(int cod) throws RemoteException {
-        this.codPart = cod;
+        this.cod = cod;
     }
 
     @Override
     public void setName(String name) throws RemoteException {
-        this.namePart = name;
+        this.name = name;
     }
 
     @Override
-    public void setDescription(String describe) throws RemoteException {
-        this.describePart = describe;
+    public void setDescription(String description) throws RemoteException {
+        this.description = description;
     }
 
+    //PART ADDERS
     @Override
-    public void setComponents() throws RemoteException {
-        //this.componentsPart.clear();
+    public void addSubComponent(Map<Part, Integer> subComponents, Part part, int quantity){
+        subComponents.put(part,quantity);
+    }
+
+    /////////////////////
+    // PART REPOSITORY //
+    /////////////////////
+
+    //PART REPOSITORY GETTERS
+    @Override
+    public Part getPart(int cod){
+        return null;
     }
 
     @Override
     public void addPart(Part part) throws RemoteException {
-        partsList.add(part);
+        parts.add(part);
     }
 
     @Override
@@ -95,14 +107,11 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
 //        }
 //        return auxSubPart.getSubComponent();
 //    }
-    @Override
-    public Part getPart(int cod){
-        return null;
-    }
+
 
     @Override
     public void showParts() throws RemoteException{
-        Iterator <Part> iterator = partsList.iterator();
+        Iterator <Part> iterator = parts.iterator();
         Part auxPart = null;
         System.out.println("------ Lista de todas as Parts ------");
         while (iterator.hasNext()) {
@@ -123,12 +132,12 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
 
     @Override
     public String getNamePartRepository() throws RemoteException {
-        return this.namePR;
+        return this.namePartsRepository;
     }
 
     @Override
     public ArrayList<Part> getParts() throws RemoteException {
-        return this.partsList;
+        return this.parts;
     }
 
     @Override
@@ -138,7 +147,7 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
 
     @Override
     public void setNamePartRepository(String name) throws RemoteException {
-        this.namePR = name;
+        this.namePartsRepository = name;
     }
 
 

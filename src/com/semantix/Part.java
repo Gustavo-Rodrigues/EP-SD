@@ -17,6 +17,7 @@ public interface Part extends Remote {
     public void setCod(int cod) throws RemoteException;
     public void setName(String name) throws RemoteException;
     public void setDescription(String description) throws RemoteException;
-    public void setComponents() throws RemoteException;
 
+    //adders
+    public void addSubComponent(Map<Part, Integer> subComponents, Part part, int quantity) throws RemoteException;
 }
