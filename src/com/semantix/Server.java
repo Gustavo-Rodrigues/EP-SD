@@ -1,15 +1,13 @@
 package com.semantix;
 
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-//import com.semantix.Part;
-//import com.semantix.PartRepository;
+import com.semantix.Part;
+import com.semantix.PartRepository;
 
-public class Server extends UnicastRemoteObject implements Part , PartRepository {
+public class Server implements Part , PartRepository {
 
 //    private static final long serialVersionUID = 1L;
 
@@ -25,10 +23,10 @@ public class Server extends UnicastRemoteObject implements Part , PartRepository
     public String namePartsRepository = "";
 
     //SERVER
-    public String nameServer = "";
+    public String serverName = "";
 
-    public Server() throws RemoteException {
-        super();
+    public Server(String serverName) throws RemoteException {
+        this.serverName = serverName;
     }
 
     ////////////
