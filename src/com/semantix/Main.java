@@ -21,16 +21,15 @@ public class Main {
             //THIS MIGHT NOT WORK
             PartRepository stub = (PartRepository) UnicastRemoteObject.exportObject(server, 0);
             // Bind the remote object's stub in the registry
+            LocateRegistry.createRegistry(9009);
             Registry registry = LocateRegistry.getRegistry();
             registry.rebind("teste", stub);
-            System.err.println("Server ready");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            System.out.println("Servidor criado as: "+dateFormat.format(date));
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
 //            e.printStackTrace();
         }
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        System.out.println("Servidor criado as: "+dateFormat.format(date));
     }
 }
