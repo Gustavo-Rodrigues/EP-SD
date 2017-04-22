@@ -1,401 +1,125 @@
 package com.semantix;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Scanner;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+import java.io.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
-class Client{
+public class Client {
 
-    public static int countParts = 0;
-    public static Scanner scan = new Scanner (System.in);
-    public static ArrayList<String> serversNames = new ArrayList<String>();
-    public static ArrayList<PartRepository> serversPR = new ArrayList<PartRepository>();
-    public static PartRepository currentPR = null;
-    public static Part currentP = null;
+    private static String command;
+    private static Part currentPart;
+    private static PartRepository currentRepository;
+    private static Map<Part, Integer> subComponents = new HashMap<Part, Integer>();
 
-    public static void main(String[] args) throws MalformedURLException, RemoteException, NotBoundException {
+    private Client() {}
 
-        System.out.println("Iniciando client");
+    public static void main(String[] args) {
 
-        addServer();
+        /*String host = (args.length < 1) ? null : args[0];
+		int port = (args.length == 2) ? 0 : Integer.parseInt(args[1]);*/
 
-        String clientAnswer = "";
-        String SeverAnswer = "y";
+        String host;
+        int port;
+        Registry registry;
+        ArrayList<Part> Parts;
 
-        while(!ynServer.equals("n")) {
-            System.out.print("Criar outro Servidor? [y/n]: ");
-            ynServer = scan.nextLine();
-            if(!ynServer.equals("y") && !ynServer.equals("n")) {
-                msgOptionNotRecognized();
-            }
-            else if(ynServer.equals("y")){
-                addServer();
-            }
-        }
+        Scanner sc1 = new Scanner(System.in);
+        System.out.println("Especifique o nome do host do registro (valor padrao: localhost) ");
+        command = sc1.nextLine();
+        host = (command.equals("")) ? null : command;
+        command = "";
+        System.out.println("Especifique a porta de acesso ao registro (valor padrao: 1099) ");
+        command = sc1.nextLine();
+        command = (command.equals("")) ? "1099" : command;
+        port = Integer.parseInt(command);
 
-        System.out.println();
-        while(!ynClient.equals("y") && !ynClient.equals("n")) {
-            System.out.print(">Iniciar Cliente? [y/n]: ");
-            ynClient = scan.nextLine();
-            if(ynClient.equals("y")) {
-                startClient();
-                break;
-            }
-            else if(ynClient.equals("n")){
-                break;
-            }
-            msgOptionNotRecognized();
-        }
-
-        scan.close();
-    }
-
-    public static void addServer() {
-        System.out.println();
-        System.out.print(">Insira o nome do Servidor: ");
-        String serverName = scan.nextLine();
-
-        runNewServer(serverName);
-        msgSucessServer();
-    }
-
-    public static void runNewServer(String nameServer){
         try {
-            Runtime.getRuntime().exec("cmd.exe /c start java Server.Main " + nameServer);
-        } catch(IOException iOException){
-            iOException.printStackTrace();
-        }
-    }
 
-    public  static String getNameWithBarsSplit(String in, int index) {
-        String[] out = in.split("/");
-        return out[index];
-    }
+            if (port != 0)
+                registry = LocateRegistry.getRegistry(host, port);
+            else
+                registry = LocateRegistry.getRegistry(host);
 
-    public static void startConnection() throws MalformedURLException, RemoteException, NotBoundException {
+            System.out.println ("Conexão estabelecida com sucesso. O que você deseja fazer agora?");
+            System.out.println();
 
-        String[] names = Naming.list("");
-        String auxS = null;
-        for (int i = 0; i < names.length; i++) {
-            auxS = names[i];
-            Part part = (Part) Naming.lookup(auxS);
-            PartRepository partRep = (PartRepository) Naming.lookup(auxS);
-            partRep.setNamePR(getNameWithBarsSplit(auxS, 4));
-            partRep.setConnection(getNameWithBarsSplit(auxS, 3) + "/" +getNameWithBarsSplit(auxS, 4));
-            serversPR.add(partRep);
-        }
+            command = sc1.nextLine();
 
-    }
+            while (!(command.toLowerCase().equals("quit"))){
 
-    public static String selectServerName(int index) throws MalformedURLException, RemoteException, NotBoundException {
-        return serversNames.get(index-1);
-    }
+                String[] parts = command.split(" ");
 
-    public static PartRepository selectServerPR() throws MalformedURLException, RemoteException, NotBoundException {
-        int index;
-        showAllServer();
-        System.out.print(">Selecione Servidor: ");
-        index = scan.nextInt();
+                switch (parts[0].toLowerCase()) {
 
-        return serversPR.get(index-1);
-    }
+                    case "bind":
+                        currentRepository = (PartRepository) registry.lookup(parts[1]);
+                        System.out.println();
+                        System.out.println("Conexão estabelecida com sucesso");
+                        System.out.println("Repositório: " + currentRepository.getServerName());
+                        System.out.println();
+                        break;
 
-    public static void showAllServer() throws RemoteException, MalformedURLException {
-
-        String[] names = Naming.list("localhost");
-        System.out.println("");
-        System.out.println(">------------- Servidores -------------");
-        for (int i = 0; i < names.length; i++){
-            System.out.printf("> %d  - " + getNameWithBarsSplit(names[i], 4).toUpperCase() + "\n", i+1);
-            serversNames.add(getNameWithBarsSplit(names[i], 4).toUpperCase());
-        }
-        System.out.println(">--------------------------------------");
-
-
-    }
-
-    public static void startClient() throws MalformedURLException, RemoteException, NotBoundException{
-
-        startConnection();
-
-        msgSucessConnection();
-
-        int indexPart = 0;
-        currentPR = selectServerPR();
-        msgCurrentClient(currentPR.getNamePR().toUpperCase(),currentPR.getConnection());
-
-        String command = "";
-
-        while(!command.equals("quit")) {
-            System.out.print  ("// >Inserir comando: ");
-            command = scan.next();
-            System.out.println("//                                                  //");
-            if(!command.equals("bind")) {
-
-                if(command.equals("getp")) {
-                    if(currentPR.getPartsList().size()!=0){
-                        indexPart = getp(currentPR);
-                        currentP = currentPR.getPartsList().get(indexPart);
-                        System.out.println("//// >Nova peca corrente: "+ currentP.getName().toUpperCase());
-                        System.out.println("//==================================================//");
-                        System.out.println("//                                                  //");
-                    }else
-                        System.out.println("Nao existe pecas nesse repositorio  ");
-                }else{
-
-                    System.out.println("//==================================================//");
-                    switcher(command, currentPR, indexPart);
-                }
-            }
-            else {
-                System.out.println("//==================================================//");
-
-                currentPR = selectServerPR();
-                if(currentPR.getPartsList().size() != 0)
-                    currentP = currentPR.getPartsList().get(0);
-                else currentP = null;
-
-                msgCurrentClient(currentPR.getNamePR().toUpperCase(),currentPR.getConnection());
-            }
-
-        }
-        scan.close();
-    }
-
-    public static int getp(PartRepository partR) throws RemoteException {
-        int codPart;
-        int index = 0;
-
-        System.out.println("//==================================================//");
-        System.out.print("//// >Insira o codigo da peca: ");
-        codPart = scan.nextInt();
-
-        Iterator <Part> iterator = partR.getPartsList().iterator();
-        Part auxS = null;
-        while (iterator.hasNext()) {
-            auxS = iterator.next();
-            if(codPart == auxS.getCod()) {
-                break;
-            }
-            index++;
-        }
-        return index;
-    }
-
-    public static void switcher(String s, PartRepository partR, int codPart) throws RemoteException {
-        switch (s) {
-
-            case "listp" :
-                Iterator <Part> iterator = partR.getPartsList().iterator();
-                Part auxS = null;
-                System.out.println("//// >------------- Lista de Parts -----------------//");
-                while (iterator.hasNext()) {
-                    auxS = iterator.next();
-                    System.out.printf("//// > "+ auxS.getCod() +" - " + auxS.getName().toUpperCase() + "\n");
-                }
-                System.out.println("//// >----------------------------------------------//");
-                System.out.println("//==================================================//");
-                System.out.println("//                                                  //");
-                break;
-
-            case "showp" :
-                if(currentP == null){
-                    System.out.println("Nao existe peca corrente no momento");
-                    break;
-                }
-                System.out.print("//// >A peca atual " + currentP.getName().toUpperCase() + " possui caracteristicas: \n");
-                System.out.println("//// > - " + currentP.getDescribe().toUpperCase());
-                Iterator<AmountSubComponents> subiterator = currentP.getComponents().iterator();
-                AmountSubComponents auxsubiterator = null;
-                if(subiterator.hasNext())
-                    System.out.println("//// > - Contem as seguintes subParts: \\Nome \\Quantidade \\ Servidor");
-
-                else
-                    System.out.println("//// > - Nao contem nenhuma sub-parts ");
-
-                while(subiterator.hasNext()){
-                    auxsubiterator = subiterator.next();
-                    System.out.println("//// > - \\" + auxsubiterator.getSubComponent().getName().toUpperCase() + " \\ "+ auxsubiterator.getAmount()+" \\ "+auxsubiterator.getServer());
-
-                }
-
-                if(currentP.getIsPrimitive())
-                    System.out.printf("//// > - Esta peca e primitiva. \n");
-                else
-                    System.out.printf("//// > - Esta peca nao e primitiva. \n");
-
-                System.out.println("//==================================================//");
-                System.out.println("//                                                  //");
-                break;
-
-            case "clearlist" :
-                if(currentP == null){
-                    System.out.println("Nao existe peca corrente no momento");
-                    break;
-                }
-                currentP.setComponents();
-                System.out.println("//// > A lista foi limpa com sucesso. ");
-                break;
-
-            case "addsubpart" :
-                if(currentP == null){
-                    System.out.println("Nao existe peca corrente no momento");
-                    break;
-                }
-                System.out.print("//// >A peca atual: " + currentP.getName().toUpperCase());
-                if(!currentP.getIsPrimitive()) {
-                    System.out.println(" nao eh primitiva. ");
-                }
-                else{
-                    System.out.println(" eh primitiva. ");
-                    System.out.println("//==================================================//");
-                    System.out.println("//                                                  //");
-                    break;
-                }
-                String auxsubpart;
-                System.out.print("//// >Insira o nome da subParte que sera inserida: ");
-                scan.nextLine();
-                auxsubpart = scan.nextLine();
-                auxsubpart = auxsubpart.replaceAll(" ", "_").toLowerCase();
-                System.out.print("//// >Insira a quantidade: ");
-                int auxsubqnt;
-                auxsubqnt = Integer.parseInt(scan.next());
-                Part auxsubpart2 = null;
-                boolean control = false;
-                for(int servers = 0; servers < serversPR.size() ; servers++){
-                    PartRepository auxrepo = serversPR.get(servers);
-                    Iterator <Part> iterator4 = auxrepo.getPartsList().iterator();
-                    while(iterator4.hasNext()){
-                        auxsubpart2 = iterator4.next();
-                        if(auxsubpart.toUpperCase().equals(auxsubpart2.getName().toUpperCase())){
-                            currentP.addSubComponents(auxsubpart2, auxsubqnt, serversNames.get(servers));
-                            System.out.println("//==================================================//");
-                            System.out.println("//// >A Parte: " + auxsubpart2.getName() + " foi adicionada com sucesso!");
-                            System.out.println("//==================================================//");
-                            System.out.println("//                                                  //");
-                            control=true;
+                    case "listp":
+                        if (currentRepository == null){
+                            System.out.println("Por favor, conecte-se antes a um repositório.");
+                            break;
                         }
-                    }
+
+                        else{
+                            Parts = currentRepository.listParts();
+                            for (Part currPart: Parts) {
+                                System.out.println("Lista de partes");
+                                System.out.println();
+                                System.out.println("Codigo:"+currPart.getCod());
+                                System.out.println("Nome: "+currPart.getName());
+                                System.out.println("descricao: "+currPart.getDescription());
+                                System.out.println();
+                            }
+                        }
+
+                        break;
+
+                    case "addp":
+                        System.out.println("Escreva o nome da peça");
+                        command = sc1.nextLine();
+                        String nomeDaPeca = command;
+                        System.out.println("Escreva a descrição da peça");
+                        command = sc1.nextLine();
+                        String descricaoDaPeca = command;
+                        int codigoDaPeca = currentRepository.addPart(nomeDaPeca,descricaoDaPeca,subComponents);
+                        System.out.println("Peca adicionada com as seguintes informacoes:");
+                        System.out.println();
+                        System.out.println("Codigo: " + codigoDaPeca);
+                        System.out.println("Nome: " + nomeDaPeca);
+                        System.out.println("Descricao: " + descricaoDaPeca);
+                        System.out.println();
+                        break;
+
+                    default:
+                        System.out.println("Por favor, insira um comando válido.");
                 }
-                if(!control){
-                    System.out.println("////Nao foi possivel inserir a subpart!           ////");
-                    System.out.println("//==================================================//");
-                    System.out.println("//                                                  //");
-                }
-                break;
+                command = sc1.nextLine();
+            }
 
-            case "addp" :
-                Part part = new Servidor();
-                countParts++;
-                String aux;
+            System.out.println("Conexão encerrada.");
+            System.out.println();
 
-                part.setCod(countParts);
-
-                System.out.print("//// >Insira o nome da Part: ");
-                scan.nextLine();
-                aux = scan.nextLine();
-
-
-                aux = aux.replaceAll(" ", "_").toLowerCase();
-                part.setName(aux);
-
-                System.out.print("//// >Insira uma descricao da Part: ");
-                aux = scan.nextLine();
-
-                aux = aux.replaceAll(" ", "_").toLowerCase();
-                part.setDescribe(aux);
-
-                System.out.print("//// >Eh primitivo? [y/n]: ");
-                while(!aux.equals("y") && !aux.equals("n")){
-                    aux = scan.next();
-                    if(aux.equals("y")){
-                        part.setIsPrimitive(true);
-                    }
-                    if(aux.equals("n")){
-                        part.setIsPrimitive(false);
-
-                    }
-                    if(!aux.equals("y") && !aux.equals("n")){
-                        System.out.println("//// > Entrada invalida. Responda com 'y' ou 'n' ");
-
-                    }
-                }
-                partR.addPart(part);
-                currentP = part;
-
-                msgSucessCreatedPart();
-
-                break;
-            //------------------------------------------------------------------------
-
-            case "quit" :
-                msgEndApp();
-                break;
-
-            default :
-                System.out.println("//// >Comando Invalido");
-                System.out.println("//==================================================//");
-                System.out.println("//                                                  //");
+          /*  String response = stub.sayHello();
+            System.out.println("response: " + response);*/
 
         }
-    }
 
-    public static void msgCurrentClient(String rep, String link) throws RemoteException {
-        System.out.println("");
-        System.out.println("//================= Conexao Atual ==================//");
-        System.out.printf ("// Repositorio: %s\n", rep);
-        System.out.printf ("// Link: %s\n", link);
-        System.out.println("// Quantidade de Pecas:" + currentPR.getPartsList().size());
-        System.out.println("//==================================================//");
-        System.out.println("//                                                  //");
+        catch (Exception e) {
+            System.err.println("Client exception: " + e.toString());
+            e.printStackTrace();
+			/*System.err.println("Por favor, insira um host válido para nos conectarmos ao RMI registry. Se preferir, deixe este campo vazio e nos conectaremos ao seu próprio localhost");*/
+        }
     }
-
-    public static void msgSucessCreatedPart() {
-        System.out.println("////                                                //");
-        System.out.println("//// > --------------------------------------       //");
-        System.out.println("//// > | Part criada com sucesso!           |       //");
-        System.out.println("//// > --------------------------------------       //");
-        System.out.println("////                                                //");
-        System.out.println("//==================================================//");
-        System.out.println("//                                                  //");
-    }
-
-    public static void msgSucessServer() {
-        System.out.println();
-        System.out.println("> --------------------------------------");
-        System.out.println("> | Servidor criado com sucesso!       |");
-        System.out.println("> --------------------------------------");
-        System.out.println();
-    }
-
-    public static void msgOptionNotRecognized() {
-        System.out.println();
-        System.out.println("> --------------------------------------");
-        System.out.println("> | Opcao nao reconhecida!             |");
-        System.out.println("> --------------------------------------");
-        System.out.println();
-    }
-
-    public static void msgSucessConnection() {
-        System.out.println();
-        System.out.println("> --------------------------------------");
-        System.out.println("> | Conexoes efetuadas com sucesso!    |");
-        System.out.println("> --------------------------------------");
-        System.out.println();
-    }
-
-    public static void msgEndApp() {
-        System.out.println();
-        System.out.println("> ===========================================");
-        System.out.println("> ||     <~~~ HASTA LA VISTA BABY ~~~>	   ||");
-        System.out.println("> ===========================================");
-        System.out.println();
-    }
-
 }
+
+
 

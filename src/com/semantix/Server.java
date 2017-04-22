@@ -2,137 +2,53 @@ package com.semantix;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 import com.semantix.Part;
 import com.semantix.PartRepository;
+import java.util.LinkedList;
 
-public class Server implements Part , PartRepository {
+public class Server implements PartRepository {
 
-//    private static final long serialVersionUID = 1L;
+    //private static final long serialVersionUID = 1L;
 
-    //PART
-    public int cod = 0;
-    public String name  = "";
-    public String description = "";
-    public Map<Part, Integer> subComponents = new HashMap<Part, Integer>();
-
-    //PART REPOSITORY
     public ArrayList<Part> parts = new ArrayList<Part>();
-    public String connection = "";
-    public String namePartsRepository = "";
-
-    //SERVER
     public String serverName = "";
 
-    public Server(String serverName) throws RemoteException {
+    //IF YOU HAVE TIME, SEE IT
+    int contador = 0;
+
+    public Server(String serverName) {
         this.serverName = serverName;
     }
 
-    ////////////
-    //  PART  //
-    ////////////
-
-
-    //PART GETTERS
-    @Override
-    public int getCod() throws RemoteException {
-        return this.cod;
-    }
-
-    @Override
-    public String getName() throws RemoteException {
-        return this.name;
-    }
-
-    @Override
-    public String getDescription() throws RemoteException {
-        return this.description;
-    }
-
-    @Override
-    public Map<Part, Integer> getSubComponents() throws RemoteException{
-        return subComponents;
+    //GETTERS
+    public String getServerName(){
+        return this.serverName;
     }
 
 
-    //PART SETTERS
-    @Override
-    public void setCod(int cod) throws RemoteException {
-        this.cod = cod;
+    public ArrayList <Part> listParts() throws RemoteException{
+
+        return parts;
+
     }
 
-    @Override
-    public void setName(String name) throws RemoteException {
-        this.name = name;
-    }
+    public int addPart(String name, String description, Map<Part, Integer> subComponents) throws RemoteException{
 
-    @Override
-    public void setDescription(String description) throws RemoteException {
-        this.description = description;
-    }
+        Part part = new PartObject();
+        part.setName(name);
+        part.setDescription(description);
+        part.setServerName(this.serverName);
+        part.addSubComponents(subComponents);
+        part.setCod(contador);
+        contador++;
 
-    //PART ADDERS
-    @Override
-    public void addSubComponent(Map<Part, Integer> subComponents, Part part, int quantity){
-        subComponents.put(part,quantity);
-    }
-
-    /////////////////////
-    // PART REPOSITORY //
-    /////////////////////
-
-    //PART REPOSITORY GETTERS
-    @Override
-    public Part getPart(int cod) throws RemoteException{
-        for (Part currPart : parts) {
-            if(currPart.getCod() == cod){
-                return currPart;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public String getConnection() throws RemoteException {
-        return this.connection;
-    }
-
-    @Override
-    public String getNamePartRepository() throws RemoteException {
-        return this.namePartsRepository;
-    }
-
-    @Override
-    public ArrayList<Part> getParts() throws RemoteException {
-        return this.parts;
-    }
-
-    //PART REPOSITORY SETTERS
-    @Override
-    public void setConnection(String conn) throws RemoteException {
-        this.connection = conn;
-    }
-
-    @Override
-    public void setNamePartRepository(String name) throws RemoteException {
-        this.namePartsRepository = name;
-    }
-
-    //PART REPOSITORY ADDERS
-    @Override
-    public void addPart(Part part) throws RemoteException {
         parts.add(part);
+
+        return part.getCod();
     }
 
-//    //PART REPOSITORY PRINTERS
-//    @Override
-//    public void showParts() throws RemoteException{
-//        for (Part currPart: parts) {
-//            System.out.println("Codigo:"+currPart.getCod());
-//            System.out.println("Nome: "+currPart.getName());
-//            System.out.println("descricao: "+currPart.getDescription());
-//        }
-//    }
+
 
 }
